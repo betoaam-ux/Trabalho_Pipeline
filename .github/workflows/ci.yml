@@ -1,0 +1,41 @@
+name: CI - Integração Contínua
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validar:
+    name: Validação e Testes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fazer checkout do código
+        uses: actions/checkout@v4
+
+      - name: Validar estrutura do projeto
+        run: |
+          echo "Verificando se o arquivo index.html existe..."
+          if [ ! -f "./site/index.html" ]; then
+            echo "ERRO: site/index.html não encontrado!"
+            exit 1
+          fi
+          echo "Arquivo encontrado com sucesso!"
+
+      - name: Executar testes simples (HTML)
+        run: |
+          echo "Rodando teste básico..."
+          if grep -q "<html" "./site/index.html"; then
+            echo "Teste OK: HTML válido."
+          else
+            echo "ERRO: index.html não contém tag <html>"
+            exit 1
+          fi
+
+      - name: Gerar artefato do site
+        uses: actions/upload-artifact@v4
+        with:
+          name: site_build
+          path: site/
